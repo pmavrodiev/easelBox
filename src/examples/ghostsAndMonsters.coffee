@@ -36,7 +36,7 @@ class window.GhostsAndMonstersGame
     # setup head
     @head = @world.addEntity(
       radiusPixels: 20,
-      imgSrc: '/img/exorcist_40x50.png',
+      imgSrc: '/img/mz.png',
       type: 'static',
       xPixels: initHeadXPixels, 
       yPixels: groundLevelPixels - 140) 
@@ -89,7 +89,7 @@ class window.GhostsAndMonstersGame
             ghost = @world.addEntity(
               widthPixels: 30,
               heightPixels: 36,
-              imgSrc: '/img/ghost_30x36.png',
+              imgSrc: '/img/enemy.png',
               xPixels: x + (blockHeight / 2),
               yPixels: y + 11)
 
