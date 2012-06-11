@@ -17,15 +17,19 @@
     </p>
     <div id="main" role="main">
       <p>To play: click and drag the head to the left, then relase it to sling it at the blocks</p>
+      <div id="restart-button">
+      	<button type="button" name="restart" onclick="GhostsAndMonstersGame.prototype.reset()" > Restart </button></button>
+      </div>
       <div id="demo">
         <p>Drawing on canvas with EaselJS</p>
-        <canvas id="easelCanvas" width="480" height="350"></canvas>
+        <canvas id="easelCanvas" width="770" height="550"></canvas>
       </div>
       <div id="debug">
-        <p>The debug drawing directly from Box2dWeb</p>
-        <canvas id="debugCanvas" width="480" height="350"></canvas>
+      	<p>The debug drawing directly from Box2dWeb</p>
+        <canvas id="debugCanvas" width="770" height="550"></canvas>
       </div>
     </div>
+ 
     <div id="stats"></div>
   </div>
   <script src="/js/lib/jquery-1.7.1.min.js"></script>

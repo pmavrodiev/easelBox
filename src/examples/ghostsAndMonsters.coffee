@@ -1,12 +1,15 @@
 class window.GhostsAndMonstersGame
   # to set up Easel-Box2d world
-  PIXELS_PER_METER = 30
+  PIXELS_PER_METER = 20
   gravityX = 0
   gravityY = 10
   # game-specific
-  frameRate = 20
-  forceMultiplier = 5
+  frameRate = 40
+  forceMultiplier = 7
   
+  reset: () ->
+    alert(window.innerWidth)
+    
   constructor: (canvas, debugCanvas, statsCanvas) ->    
     @world = new EaselBoxWorld(this, frameRate, canvas, debugCanvas, gravityX, gravityY, PIXELS_PER_METER)
     
@@ -16,22 +19,21 @@ class window.GhostsAndMonstersGame
 
     worldWidthPixels = canvas.width
     worldHeightPixels = canvas.height
-    initHeadXPixels = 100
+    initHeadXPixels = 140
     groundLevelPixels = worldHeightPixels - (37/2)
     
-    @world.addImage("/img/sky.jpg", {scaleX: 1.3, scaleY: 1.3})    
-    @world.addImage("/img/trees.png", {scaleX: 0.5, scaleY: 0.5, y: worldHeightPixels - 400 * 0.55})
+    @world.addImage("/img/sky.jpg", {scaleX: 1.3, scaleY: 1.7})    
+    @world.addImage("/img/trees.png", {scaleX: 0.5, scaleY: 0.9, y: worldHeightPixels - 700 * 0.55})
     @world.addImage("/img/mountains.png", {scaleX: 1, scaleY: 1, y: worldHeightPixels - 254 * 1})
-        
+    @world.addImage("/img/catapult_50x150.png", {x: initHeadXPixels - 10, y:  worldHeightPixels - 160})    
+    
     ground = @world.addEntity(
-      widthPixels: 1024,
+      widthPixels: 1540,
       heightPixels: 37,
       imgSrc: '/img/ground-cropped.png',
       type: 'static',
       xPixels: 0, 
-      yPixels: groundLevelPixels)   
-
-    @world.addImage("/img/catapult_50x150.png", {x: initHeadXPixels - 30, y:  worldHeightPixels - 160})
+      yPixels: groundLevelPixels)      
 
     # setup head
     @head = @world.addEntity(
@@ -39,32 +41,66 @@ class window.GhostsAndMonstersGame
       imgSrc: '/img/mz.png',
       type: 'static',
       xPixels: initHeadXPixels, 
-      yPixels: groundLevelPixels - 140) 
+      yPixels: groundLevelPixels - 140,
+      motionRadiusPixels = 40
+      ) 
 
     @head.selected = false
     @head.easelObj.onPress = (eventPress) =>
       @head.selected = true
-      @head.initPositionXpixels = eventPress.stageX
-      @head.initPositionYpixels = eventPress.stageY
+      #@head.initPositionXpixels = eventPress.stageX
+      #@head.initPositionYpixels = eventPress.stageY
+      @head.initPositionXpixels = initHeadXPixels
+      @head.initPositionYpixels = groundLevelPixels - 140
+     
       
       eventPress.onMouseMove = (event) =>
-        @head.setState(xPixels: event.stageX, yPixels: event.stageY)
+        #inside the bounding circle?
+        if Math.pow(event.stageX-@head.initPositionXpixels,2)+Math.pow(event.stageY-@head.initPositionYpixels,2) <= Math.pow(motionRadiusPixels,2)
+         @head.setState(xPixels: event.stageX, yPixels: event.stageY)  
     
       eventPress.onMouseUp = (event) =>
         @head.selected = false
-        @head.setType "dynamic"  
+        @head.setType "dynamic"
+        #helpful function
+        sgn = (x) ->
+          if x>0 
+            1 
+          else if x<0  
+            -1
+          else  
+            0   
+        #are we inside the bounding circle?
+        alert("x origin "+@head.initPositionXpixels)
+        alert("y origin "+@head.initPositionYpixels)
+        alert("x event " + event.stageX)
+        alert("y event " + event.stageY)
+    
+        if Math.pow(event.stageX-@head.initPositionXpixels,2)+Math.pow(event.stageY-@head.initPositionYpixels,2) > Math.pow(motionRadiusPixels,2)
+          #the angle of the mouseup point with the x-axis
+          theta=Math.atan(event.stageY/event.stageX)
+          alert("angle "+360/theta)
+          event.stageX=(Math.cos(theta)*motionRadiusPixels+@head.initPositionXpixels)*sgn(event.stageX)
+          event.stageY=(Math.sin(theta)*motionRadiusPixels+@head.initPositionYpixels)*sgn(event.stageY)
+        alert("x event post " + event.stageX)
+        alert("y event post " + event.stageY)  
         forceX = (@head.initPositionXpixels - event.stageX) * forceMultiplier
         forceY = (@head.initPositionYpixels - event.stageY) * forceMultiplier
         @head.body.ApplyImpulse(
           @world.vector(forceX, forceY),
           @world.vector(@head.body.GetPosition().x, @head.body.GetPosition().y)
-        )    
-
+        )
+ 
     # draw pyramid    
+    @drawPyramid(groundLevelPixels)
+    
+    
+  drawPyramid: (groundLevelPixels) ->
     blockWidth = 15 
     blockHeight = 60 
-    leftPyamid = 300
-    levels = 3
+    leftPyamid = 500
+    levels = 4
+
     topOfPyramid = groundLevelPixels - levels *  (blockHeight + blockWidth) + 26
     for i in [0...levels]
       for j in [0..i+1]
@@ -92,7 +128,9 @@ class window.GhostsAndMonstersGame
               imgSrc: '/img/enemy.png',
               xPixels: x + (blockHeight / 2),
               yPixels: y + 11)
-
+  
+    
+   
   # optional: a callback for each EaselBox2dWorld tick()
   tick: () ->
     @stats.update()

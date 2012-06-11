@@ -219,8 +219,8 @@
       debugDraw.SetSprite(debugCanvas.getContext("2d"));
       debugDraw.SetDrawScale(this.pixelsPerMeter);
       debugDraw.SetFillAlpha(0.3);
-      debugDraw.SetLineThickness(1.0);
-      debugDraw.SetFlags(Box2D.Dynamics.b2DebugDraw.e_shapeBit | Box2D.Dynamics.b2DebugDraw.e_jointBit);
+      debugDraw.SetLineThickness(2.0);
+      debugDraw.SetFlags(Box2D.Dynamics.b2DebugDraw.e_shapeBit | Box2D.Dynamics.b2DebugDraw.e_jointBit | Box2D.Dynamics.b2DebugDraw.e_centerOfMassBit);
       this.box2dWorld.SetDebugDraw(debugDraw);
     }
 
