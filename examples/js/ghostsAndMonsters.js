@@ -60,22 +60,26 @@
         type: 'static',
         xPixels: initHeadXPixels,
         yPixels: groundLevelPixels - 140
-      }, motionRadiusPixels = 40);
+      }, motionRadiusPixels = 100);
       this.head.selected = false;
       this.head.easelObj.onPress = function(eventPress) {
         _this.head.selected = true;
         _this.head.initPositionXpixels = initHeadXPixels;
         _this.head.initPositionYpixels = groundLevelPixels - 140;
         eventPress.onMouseMove = function(event) {
+          var deltaX;
           if (Math.pow(event.stageX - _this.head.initPositionXpixels, 2) + Math.pow(event.stageY - _this.head.initPositionYpixels, 2) <= Math.pow(motionRadiusPixels, 2)) {
-            return _this.head.setState({
-              xPixels: event.stageX,
-              yPixels: event.stageY
-            });
+            deltaX = event.stageX - _this.head.initPositionXpixels;
+            if (deltaX <= 0) {
+              return _this.head.setState({
+                xPixels: event.stageX,
+                yPixels: event.stageY
+              });
+            }
           }
         };
         return eventPress.onMouseUp = function(event) {
-          var forceX, forceY, sgn, theta;
+          var deltaX, deltaY, forceX, forceY, sgn, theta;
           _this.head.selected = false;
           _this.head.setType("dynamic");
           sgn = function(x) {
@@ -87,18 +91,14 @@
               return 0;
             }
           };
-          alert("x origin " + _this.head.initPositionXpixels);
-          alert("y origin " + _this.head.initPositionYpixels);
-          alert("x event " + event.stageX);
-          alert("y event " + event.stageY);
-          if (Math.pow(event.stageX - _this.head.initPositionXpixels, 2) + Math.pow(event.stageY - _this.head.initPositionYpixels, 2) > Math.pow(motionRadiusPixels, 2)) {
-            theta = Math.atan(event.stageY / event.stageX);
-            alert("angle " + 360 / theta);
-            event.stageX = (Math.cos(theta) * motionRadiusPixels + _this.head.initPositionXpixels) * sgn(event.stageX);
-            event.stageY = (Math.sin(theta) * motionRadiusPixels + _this.head.initPositionYpixels) * sgn(event.stageY);
+          deltaX = event.stageX - _this.head.initPositionXpixels;
+          deltaY = event.stageY - _this.head.initPositionYpixels;
+          if (Math.pow(deltaX, 2) + Math.pow(deltaY, 2) > Math.pow(motionRadiusPixels, 2)) {
+            theta = Math.atan(Math.abs(deltaY / deltaX));
+            event.stageX = Math.cos(theta) * motionRadiusPixels * sgn(deltaX) + _this.head.initPositionXpixels;
+            event.stageY = Math.sin(theta) * motionRadiusPixels * sgn(deltaY) + _this.head.initPositionYpixels;
+            event.stageX = Math.min(event.stageX, _this.head.initPositionXpixels);
           }
-          alert("x event post " + event.stageX);
-          alert("y event post " + event.stageY);
           forceX = (_this.head.initPositionXpixels - event.stageX) * forceMultiplier;
           forceY = (_this.head.initPositionYpixels - event.stageY) * forceMultiplier;
           return _this.head.body.ApplyImpulse(_this.world.vector(forceX, forceY), _this.world.vector(_this.head.body.GetPosition().x, _this.head.body.GetPosition().y));

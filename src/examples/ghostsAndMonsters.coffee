@@ -42,7 +42,7 @@ class window.GhostsAndMonstersGame
       type: 'static',
       xPixels: initHeadXPixels, 
       yPixels: groundLevelPixels - 140,
-      motionRadiusPixels = 40
+      motionRadiusPixels = 100
       ) 
 
     @head.selected = false
@@ -55,9 +55,11 @@ class window.GhostsAndMonstersGame
      
       
       eventPress.onMouseMove = (event) =>
-        #inside the bounding circle?
-        if Math.pow(event.stageX-@head.initPositionXpixels,2)+Math.pow(event.stageY-@head.initPositionYpixels,2) <= Math.pow(motionRadiusPixels,2)
-         @head.setState(xPixels: event.stageX, yPixels: event.stageY)  
+        #are on the left side of the bounding circle?
+         if Math.pow(event.stageX-@head.initPositionXpixels,2)+Math.pow(event.stageY-@head.initPositionYpixels,2) <= Math.pow(motionRadiusPixels,2)
+            deltaX = event.stageX-@head.initPositionXpixels
+            if (deltaX <=0)
+              @head.setState(xPixels: event.stageX, yPixels: event.stageY)  
     
       eventPress.onMouseUp = (event) =>
         @head.selected = false
@@ -70,20 +72,26 @@ class window.GhostsAndMonstersGame
             -1
           else  
             0   
+        
+        #alert("x origin "+@head.initPositionXpixels)
+        #alert("y origin "+@head.initPositionYpixels)
+        #alert("x event " + event.stageX)
+        #alert("y event " + event.stageY)
         #are we inside the bounding circle?
-        alert("x origin "+@head.initPositionXpixels)
-        alert("y origin "+@head.initPositionYpixels)
-        alert("x event " + event.stageX)
-        alert("y event " + event.stageY)
-    
-        if Math.pow(event.stageX-@head.initPositionXpixels,2)+Math.pow(event.stageY-@head.initPositionYpixels,2) > Math.pow(motionRadiusPixels,2)
-          #the angle of the mouseup point with the x-axis
-          theta=Math.atan(event.stageY/event.stageX)
-          alert("angle "+360/theta)
-          event.stageX=(Math.cos(theta)*motionRadiusPixels+@head.initPositionXpixels)*sgn(event.stageX)
-          event.stageY=(Math.sin(theta)*motionRadiusPixels+@head.initPositionYpixels)*sgn(event.stageY)
-        alert("x event post " + event.stageX)
-        alert("y event post " + event.stageY)  
+        deltaX = event.stageX-@head.initPositionXpixels
+        deltaY = event.stageY-@head.initPositionYpixels
+        if Math.pow(deltaX,2)+Math.pow(deltaY,2) > Math.pow(motionRadiusPixels,2)
+          #the angle of the mouseup point with the x-axis          
+          theta=Math.atan(Math.abs(deltaY/deltaX))          
+          #alert("angle "+ theta*180/Math.PI + " degrees")
+          
+          
+          event.stageX=Math.cos(theta)*motionRadiusPixels*sgn(deltaX)+@head.initPositionXpixels
+          event.stageY=Math.sin(theta)*motionRadiusPixels*sgn(deltaY)+@head.initPositionYpixels
+          #bound to left semi-circle
+          event.stageX = Math.min(event.stageX,@head.initPositionXpixels)
+        #alert("x event post " + event.stageX)
+        #alert("y event post " + event.stageY)  
         forceX = (@head.initPositionXpixels - event.stageX) * forceMultiplier
         forceY = (@head.initPositionYpixels - event.stageY) * forceMultiplier
         @head.body.ApplyImpulse(
